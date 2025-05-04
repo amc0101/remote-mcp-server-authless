@@ -58,20 +58,21 @@ export class MyMCP extends McpAgent {
 	}
 }
 
+const agent = new MyMCP();
+await agent.init(); // <-- ensure tools are registered
+
 export default {
-	fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		const url = new URL(request.url);
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const url = new URL(request.url);
 
-		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-			// @ts-ignore
-			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
-		}
+    if (url.pathname === "/sse" || url.pathname === "/sse/message") {
+      return agent.server.serveSSE().fetch(request, env, ctx);
+    }
 
-		if (url.pathname === "/mcp") {
-			// @ts-ignore
-			return MyMCP.serve("/mcp").fetch(request, env, ctx);
-		}
+    if (url.pathname === "/mcp") {
+      return agent.server.serve().fetch(request, env, ctx);
+    }
 
-		return new Response("Not found", { status: 404 });
-	},
+    return new Response("Not found", { status: 404 });
+  },
 };
